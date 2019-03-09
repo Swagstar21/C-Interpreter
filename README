@@ -1,0 +1,39 @@
+Pentru implementarea nodului folosesc o clasa numita Node care are urmatoarele campuri: level
+pentru gradul de indentare, line pentru a specifica linia la care a fost efectuata instantierea
+nodului, tipul nodului (<IntNode> de exemplu), AValue, BValue sau Var pentru a stoca valoarea
+in functie de tipul nodului, c1, c2 si c3 copiii nodului si necesitaSecventa care va determina
+daca este necesara inserarea unui nod de secventa daca dupa nodul curent apare o alta instruc-
+tiune. setValue() este o metoda overloaded ce va seta valoarea nodului. show() va crea un sir
+de caractere care sa prezinte nodul si copiii lui, tinand cont de gradul lor de indentare.
+incrementLevel() va seta nivelul nodului la cel dat ca parametru iar copiii lui vor lua valoarea
+respectiva + 1. E un mod simplu de a obtine gradele de indentare dupa ce AST-ul a fost construit.
+getValue() returneaza valoarea corespunzatoare unui nod. Daca este un nod int sau bool se
+returneaza campul corespunzator. Daca este de tip var programul se uita in lista de variabile
+ca sa ii determine valoarea. Daca nu este gasit programul se va opri iar tipul erorii si linia
+la care a avut loc vor fi salvate. Daca nodul este o operatie se returneaza rezultatul operatiei
+respective dintre valorile copiilor. Daca survine o impartire la 0 se procedeaza ca mai sus.
+execute() este metoda ce dicteaza modul in care se executa programul. Aici are loc logica progra-
+mului IMP. Daca nodul este de tip main va executa logica copilului. La fel fac si blocknode si
+sequence node. AssignmentNode extrage numele copilului 1 si valoarea copilului 2 si cauta in lista
+de variabile pozitia corespunzatoarea lui c1. Daca o gaseste ii schimba valoarea. Daca nu, execu-
+tia programului se opreste. Daca este de tip if se executa c2 daca c1 este true altfel se executa
+c3. Daca este de tip while se executa c2 cat timp c1 are valoarea true. analyse() are rolul de
+a cauta variabile nedeclarate si in ramurile de cod ce nu se executa la runtime.
+
+In fisierul flex, declar o stiva de noduri, 3 liste pentru a memora variabilele, valorile lor si
+daca au fost declarate si o variabila line care va fi incrementata la parsarea a anumiti tokeni.
+Cand automatul se afla in starea YYINITIAL, se instantiaza radacina si se pune in stiva. Se trece
+apoi in starea DECL, in care se vor instantia variabile. La gasirea unei variabile se adauga cate
+un element in fiecare lista. La terminarea declaratiilor se trece in starea CORP. Aceasta este
+starea in care se trimit instructiuni; este o stare corespunzatoare interiorului unui bloc de cod.
+Daca este gasit numele unei variabile va urma un assignment. Atunci cand dam peste '=' scoatem de
+pe stiva nodul de dinainte, il facem copilul nodului de assignment, punem pe stiva nodul '=' si
+trecem in starea AEXPR. La fel procedam si cand dam peste un "if" sau in "while", trecand in sta-
+rea "IF" respectiv "WHILE". In starea AEXPR se fac calculele. Prioritatea cea mai mare o au pa-
+rantezele, apoi impartirea si la final adunarea. Cand se inchide o paranteza, se vor scoate toate
+nodurile de pe stiva pana la gasirea unui nod bracket. Fiecare nod scos devine c2-ul nodului din
+varful stivei. Daca este gasita o variabila sau un numar si nodul din varful stivei este un div
+node, nu se mai pune in stiva ci se pune ca c2 in nodul div. Daca este de tip "+" se scot toate
+nodurile de pe stiva pana la gasirea nodului '=' sau o paranteza in timp ce se inlantuiesc. Daca
+se gaseste ";" se inlantuiesc nodurile de pe stiva pana la gasirea nodului '=' si se trece in
+starea CORP. Intr-un mod asemanator se procedeaza si cu IF si WHILE.
